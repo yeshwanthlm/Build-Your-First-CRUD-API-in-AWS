@@ -1,7 +1,14 @@
 import json
 import boto3
+from decimal import Decimal
 
 dynamo = boto3.resource('dynamodb').Table('http-crud-tutorial-items')
+
+class DecimalEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, Decimal):
+            return float(obj)
+        return super(DecimalEncoder, self).default(obj)
 
 def lambda_handler(event, context):
     status_code = 200
@@ -45,7 +52,7 @@ def lambda_handler(event, context):
         status_code = 400
         body = str(e)
     finally:
-        body = json.dumps(body)
+        body = json.dumps(body, cls=DecimalEncoder)
 
     return {
         'statusCode': status_code,
