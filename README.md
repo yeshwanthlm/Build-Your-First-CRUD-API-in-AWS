@@ -23,25 +23,19 @@ When you invoke your HTTP API, API Gateway routes the request to your Lambda fun
 ## Steps to Deploy
 
 * Step 1: Create a DynamoDB table: \
-  For Table name, enter: http-crud-tutorial-items \
-  For Primary key, enter id
+  a. For Table name, enter: http-crud-tutorial-items \
+  b. For Primary key, enter id
 
 * Step 2: Create a lambda function: \
-  Name: http-crud-tutorial-function \
-  Runtime: Python 3.x \
-  Execution role: IAM role with DynamoDB and API permissions \
-  Code: Use the UploadFunction Python code.
+  a. Name: http-crud-tutorial-function \
+  b. Runtime: Python 3.x \
+  c. Execution role: IAM role with DynamoDB and API permissions \
+  d. Code: Use the CURD.py Python code.
 
-* Step 3: Create the Lambda function to handle file downloads (DownloadFunction): \
-  Name: DownloadFunction \
-  Runtime: Python 3.x \
-  Execution role: IAM role with S3 write permissions \
-  Code: Use the CURD.py Python code.
-
-* Step 4: Create an HTTP API \
+* Step 3: Create an HTTP API \
   Name: http-crud-tutorial-api
 
-* Step 5: Create routes: \
+* Step 4: Create routes: \
   
   ```bash
   GET /items/{id}
@@ -53,34 +47,26 @@ When you invoke your HTTP API, API Gateway routes the request to your Lambda fun
   DELETE /items/{id}
   ```
   
-* Step 6: Create an integration: \
+* Step 5: Create an integration: \
 
-  Choose your API (http-crud-tutorial-api) \
-  Choose Integrations \
-  Choose Manage integrations and then choose Create  Skip Attach this integration to a route. You complete that in a later step. \
-  For Integration type, choose Lambda function \
-  For Lambda function, enter http-crud-tutorial-function \
+  a. Choose your API (http-crud-tutorial-api) \
+  b. Choose Integrations \
+  c. Choose Manage integrations and then choose Create  Skip Attach this integration to a route. You complete that in a later step. \
+  d. For Integration type, choose Lambda function \
+  e. For Lambda function, enter http-crud-tutorial-function \
 
-  ```bash
-  {
-    "body" : "$input.body",
-    "queryStringParameters" : {
-        "fileName" : "$input.params('fileName')"
-    }
-  }
-  ```
-* Step 7: Attach your integration to routes: \
-  Choose your API (http-crud-tutorial-api) \
-  Choose Integrations \
-  Choose a route \
-  Under Choose an existing integration, choose http-crud-tutorial-function \
-  Choose Attach integration \
-  Repeat steps 4-6 for all routes. All routes show that an AWS Lambda integration is attached. \
-  Note your API's invoke URL. It appears under Invoke URL on the Details page.
+* Step 6: Attach your integration to routes: \
+  a. Choose your API (http-crud-tutorial-api) \
+  b. Choose Integrations \
+  c. Choose a route \
+  d. Under Choose an existing integration, choose http-crud-tutorial-function \
+  e. Choose Attach integration \
+  f. Repeat steps 4-6 for all routes. All routes show that an AWS Lambda integration is attached. \
+  g. Note your API's invoke URL. It appears under Invoke URL on the Details page.
 
-* Step 8: Create Cloud9 Environment
+* Step 7: Create Cloud9 Environment
 
-* Step 9: Testing: 
+* Step 8: Testing: 
   
   1) Export API Invoke URL: \
 
