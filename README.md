@@ -107,7 +107,7 @@ When you invoke your HTTP API, API Gateway routes the request to your Lambda fun
   ```
 
 
-Link to the video tutorial: 
+Link to the video tutorial: https://youtu.be/mVMfsOYlCuA
 
 Follow our tutorials here: https://www.youtube.com/@amonkincloud/videos \
 Follow my personal blog here:https://dev.to/yeshwanthlm/ \
