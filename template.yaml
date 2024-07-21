@@ -1,0 +1,108 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+Resources:
+  DynamoDBTable:
+    Type: 'AWS::DynamoDB::Table'
+    Properties:
+      TableName: 'http-crud-tutorial-items'
+      AttributeDefinitions:
+        - AttributeName: 'id'
+          AttributeType: 'S'
+      KeySchema:
+        - AttributeName: 'id'
+          KeyType: 'HASH'
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
+
+  LambdaExecutionRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      RoleName: 'http-crud-tutorial-lambda-execution-role'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: 'Allow'
+            Principal:
+              Service: 'lambda.amazonaws.com'
+            Action: 'sts:AssumeRole'
+      Policies:
+        - PolicyName: 'DynamoDBAndAPIPermissions'
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: 'Allow'
+                Action:
+                  - 'dynamodb:*'
+                  - 'logs:*'
+                  - 'lambda:*'
+                  - 'apigateway:*'
+                Resource: '*'
+
+  LambdaFunction:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      FunctionName: 'http-crud-tutorial-function'
+      Handler: 'CURD.lambda_handler'
+      Role: !GetAtt LambdaExecutionRole.Arn
+      CodeUri: .
+      Runtime: 'python3.9'
+      Timeout: 30
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - AmazonDynamoDBFullAccess
+
+  HttpApi:
+    Type: 'AWS::ApiGatewayV2::Api'
+    Properties:
+      Name: 'http-crud-tutorial-api'
+      ProtocolType: 'HTTP'
+
+  ApiGatewayLambdaIntegration:
+    Type: 'AWS::ApiGatewayV2::Integration'
+    Properties:
+      ApiId: !Ref HttpApi
+      IntegrationType: 'AWS_PROXY'
+      IntegrationUri: !Sub 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaFunction.Arn}/invocations'
+      PayloadFormatVersion: '2.0'
+
+  GetItemRoute:
+    Type: 'AWS::ApiGatewayV2::Route'
+    Properties:
+      ApiId: !Ref HttpApi
+      RouteKey: 'GET /items/{id}'
+      Target: !Sub 'integrations/${ApiGatewayLambdaIntegration}'
+
+  GetItemsRoute:
+    Type: 'AWS::ApiGatewayV2::Route'
+    Properties:
+      ApiId: !Ref HttpApi
+      RouteKey: 'GET /items'
+      Target: !Sub 'integrations/${ApiGatewayLambdaIntegration}'
+
+  PutItemRoute:
+    Type: 'AWS::ApiGatewayV2::Route'
+    Properties:
+      ApiId: !Ref HttpApi
+      RouteKey: 'PUT /items'
+      Target: !Sub 'integrations/${ApiGatewayLambdaIntegration}'
+
+  DeleteItemRoute:
+    Type: 'AWS::ApiGatewayV2::Route'
+    Properties:
+      ApiId: !Ref HttpApi
+      RouteKey: 'DELETE /items/{id}'
+      Target: !Sub 'integrations/${ApiGatewayLambdaIntegration}'
+
+  LambdaApiPermission:
+    Type: 'AWS::Lambda::Permission'
+    Properties:
+      FunctionName: !Ref LambdaFunction
+      Action: 'lambda:InvokeFunction'
+      Principal: 'apigateway.amazonaws.com'
+      SourceArn: !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${HttpApi}/**'
+
+Outputs:
+  ApiUrl:
+    Description: 'The URL of the HTTP API'
+    Value: !Sub 'https://${HttpApi}.execute-api.${AWS::Region}.amazonaws.com'
