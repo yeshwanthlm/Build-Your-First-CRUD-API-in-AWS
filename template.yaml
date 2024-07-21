@@ -45,7 +45,7 @@ Resources:
       FunctionName: 'http-crud-tutorial-function'
       Handler: 'CURD.lambda_handler'
       Role: !GetAtt LambdaExecutionRole.Arn
-      CodeUri: .
+      CodeUri: ./crud/
       Runtime: 'python3.9'
       Timeout: 30
       Policies:
